@@ -29,8 +29,14 @@
 #ifndef DATA_CALLBACK_H_
 #define DATA_CALLBACK_H_
 
-#include <stddef.h>
+#include <cstddef>
 #include <libfreenect2/config.h>
+
+#if defined(LIBFREENECT2_WITH_CXX11_SUPPORT)
+#include <cstdint>
+#elif !defined(uint64_t)
+typedef unsigned long int uint64_t;
+#endif
 
 namespace libfreenect2
 {
@@ -43,7 +49,7 @@ public:
    * @param buffer Buffer with new data.
    * @param n Size of the new data.
    */
-  virtual void onDataReceived(unsigned char *buffer, size_t n) = 0;
+  virtual void onDataReceived(unsigned char *buffer, size_t n, uint64_t ts_system) = 0;
 };
 
 } // namespace libfreenect2

@@ -158,7 +158,8 @@ void VTRgbPacketProcessor::process(const RgbPacket &packet)
     Frame *frame = new VTFrame(1920, 1080, 4, pixelBuffer);
     frame->format = Frame::BGRX;
 
-    frame->timestamp = packet.timestamp;
+    frame->ts_device = packet.ts_device;
+    frame->ts_system = packet.ts_system;
     frame->sequence = packet.sequence;
     frame->exposure = packet.exposure;
     frame->gain = packet.gain;

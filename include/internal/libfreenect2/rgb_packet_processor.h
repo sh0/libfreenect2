@@ -44,7 +44,8 @@ struct RgbPacket
 {
   uint32_t sequence;
 
-  uint32_t timestamp;
+  uint32_t ts_device;
+  uint64_t ts_system;
   unsigned char *jpeg_buffer; ///< JPEG data.
   size_t jpeg_buffer_length;  ///< Length of the JPEG data.
   float exposure;

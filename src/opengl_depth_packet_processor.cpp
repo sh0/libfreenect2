@@ -82,7 +82,7 @@ private:
 protected:
   WithOpenGLBindings() : bindings(0) {}
   virtual ~WithOpenGLBindings() {}
-  
+
   virtual void onOpenGLBindingsChanged(OpenGLBindings *b) { }
 public:
   void gl(OpenGLBindings *bindings)
@@ -90,7 +90,7 @@ public:
     this->bindings = bindings;
     onOpenGLBindingsChanged(this->bindings);
   }
-  
+
   OpenGLBindings *gl()
   {
     return bindings;
@@ -458,8 +458,8 @@ public:
     glfwDestroyWindow(opengl_context_ptr);
     opengl_context_ptr = 0;
   }
-  
-  virtual void onOpenGLBindingsChanged(OpenGLBindings *b) 
+
+  virtual void onOpenGLBindingsChanged(OpenGLBindings *b)
   {
     lut11to16.gl(b);
     p0table[0].gl(b);
@@ -488,7 +488,7 @@ public:
 
     filter2_debug.gl(b);
     filter2_depth.gl(b);
- 
+
     stage1.gl(b);
     filter1.gl(b);
     stage2.gl(b);
@@ -515,7 +515,7 @@ public:
   void initialize()
   {
     ChangeCurrentOpenGLContext ctx(opengl_context_ptr);
-    
+
     int major = glfwGetWindowAttrib(opengl_context_ptr, GLFW_CONTEXT_VERSION_MAJOR);
     int minor = glfwGetWindowAttrib(opengl_context_ptr, GLFW_CONTEXT_VERSION_MINOR);
 
@@ -864,7 +864,7 @@ OpenGLDepthPacketProcessor::OpenGLDepthPacketProcessor(void *parent_opengl_conte
       LOG_ERROR << "Failed to initialize GLFW.";
       exit(-1);
   }
-  
+
   // setup context
   glfwDefaultWindowHints();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -971,8 +971,10 @@ void OpenGLDepthPacketProcessor::process(const DepthPacket &packet)
 
   impl_->stopTiming(LOG_INFO);
 
-  ir->timestamp = packet.timestamp;
-  depth->timestamp = packet.timestamp;
+  ir->ts_device = packet.ts_device;
+  depth->ts_device = packet.ts_device;
+  ir->ts_system = packet.ts_system;
+  depth->ts_system = packet.ts_system;
   ir->sequence = packet.sequence;
   depth->sequence = packet.sequence;
 

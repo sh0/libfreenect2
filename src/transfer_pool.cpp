@@ -174,11 +174,19 @@ void TransferPool::allocateTransfers(size_t num_transfers, size_t transfer_size)
 
 void TransferPool::onTransferCompleteStatic(libusb_transfer* transfer)
 {
+  #ifdef LIBFREENECT2_WITH_CXX11_SUPPORT
+  uint64_t ts_system = std::chrono::duration_cast<std::chrono::microseconds>(
+    std::chrono::high_resolution_clock::now().time_since_epoch()
+  ).count() / 100;
+  #else
+  uint64_t ts_system = 0;
+  #endif
+
   TransferPool::Transfer *t = reinterpret_cast<TransferPool::Transfer*>(transfer->user_data);
-  t->pool->onTransferComplete(t);
+  t->pool->onTransferComplete(t, ts_system);
 }
 
-void TransferPool::onTransferComplete(TransferPool::Transfer* t)
+void TransferPool::onTransferComplete(TransferPool::Transfer* t, uint64_t ts_system)
 {
   if(t->transfer->status == LIBUSB_TRANSFER_CANCELLED)
   {
@@ -187,7 +195,7 @@ void TransferPool::onTransferComplete(TransferPool::Transfer* t)
   }
 
   // process data
-  processTransfer(t->transfer);
+  processTransfer(t->transfer, ts_system);
 
   if(!enable_submit_)
   {
@@ -229,12 +237,12 @@ void BulkTransferPool::fillTransfer(libusb_transfer* transfer)
   transfer->type = LIBUSB_TRANSFER_TYPE_BULK;
 }
 
-void BulkTransferPool::processTransfer(libusb_transfer* transfer)
+void BulkTransferPool::processTransfer(libusb_transfer* transfer, uint64_t ts_system)
 {
   if(transfer->status != LIBUSB_TRANSFER_COMPLETED) return;
 
   if(callback_)
-    callback_->onDataReceived(transfer->buffer, transfer->actual_length);
+    callback_->onDataReceived(transfer->buffer, transfer->actual_length, ts_system);
 }
 
 IsoTransferPool::IsoTransferPool(libusb_device_handle* device_handle, unsigned char device_endpoint) :
@@ -269,7 +277,7 @@ void IsoTransferPool::fillTransfer(libusb_transfer* transfer)
   libusb_set_iso_packet_lengths(transfer, packet_size_);
 }
 
-void IsoTransferPool::processTransfer(libusb_transfer* transfer)
+void IsoTransferPool::processTransfer(libusb_transfer* transfer, uint64_t ts_system)
 {
   unsigned char *ptr = transfer->buffer;
 
@@ -278,7 +286,7 @@ void IsoTransferPool::processTransfer(libusb_transfer* transfer)
     if(transfer->iso_packet_desc[i].status != LIBUSB_TRANSFER_COMPLETED) continue;
 
     if(callback_)
-      callback_->onDataReceived(ptr, transfer->iso_packet_desc[i].actual_length);
+      callback_->onDataReceived(ptr, transfer->iso_packet_desc[i].actual_length, ts_system);
 
     ptr += transfer->iso_packet_desc[i].length;
   }

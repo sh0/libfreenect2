@@ -240,7 +240,7 @@ template<typename ScalarT>
 void flipHorizontal(const Mat<ScalarT> &in, Mat<ScalarT>& out)
 {
   in.copyTo(out);
-  
+
   typedef unsigned char type;
 
   int linestep = out.sizeInBytes() / out.height() / sizeof(type);
@@ -816,7 +816,7 @@ CpuDepthPacketProcessor::~CpuDepthPacketProcessor()
 void CpuDepthPacketProcessor::setConfiguration(const libfreenect2::DepthPacketProcessor::Config &config)
 {
   DepthPacketProcessor::setConfiguration(config);
-  
+
   impl_->params.min_depth = config.MinDepth * 1000.0f;
   impl_->params.max_depth = config.MaxDepth * 1000.0f;
   impl_->enable_bilateral_filter = config.EnableBilateralFilter;
@@ -882,8 +882,10 @@ void CpuDepthPacketProcessor::process(const DepthPacket &packet)
 
   impl_->startTiming();
 
-  impl_->ir_frame->timestamp = packet.timestamp;
-  impl_->depth_frame->timestamp = packet.timestamp;
+  impl_->ir_frame->ts_device = packet.ts_device;
+  impl_->depth_frame->ts_device = packet.ts_device;
+  impl_->ir_frame->ts_system = packet.ts_system;
+  impl_->depth_frame->ts_system = packet.ts_system;
   impl_->ir_frame->sequence = packet.sequence;
   impl_->depth_frame->sequence = packet.sequence;
 

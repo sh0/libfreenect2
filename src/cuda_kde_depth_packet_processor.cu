@@ -1392,8 +1392,10 @@ void CudaKdeDepthPacketProcessor::process(const DepthPacket &packet)
 
   impl_->startTiming();
 
-  impl_->ir_frame->timestamp = packet.timestamp;
-  impl_->depth_frame->timestamp = packet.timestamp;
+  impl_->ir_frame->ts_device = packet.ts_device;
+  impl_->depth_frame->ts_device = packet.ts_device;
+  impl_->ir_frame->ts_system = packet.ts_system;
+  impl_->depth_frame->ts_system = packet.ts_system;
   impl_->ir_frame->sequence = packet.sequence;
   impl_->depth_frame->sequence = packet.sequence;
 

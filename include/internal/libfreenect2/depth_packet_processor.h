@@ -44,7 +44,8 @@ namespace libfreenect2
 struct DepthPacket
 {
   uint32_t sequence;
-  uint32_t timestamp;
+  uint32_t ts_device;
+  uint64_t ts_system;
   unsigned char *buffer; ///< Depth data.
   size_t buffer_length;  ///< Size of depth data.
 
@@ -304,7 +305,7 @@ class DumpDepthPacketProcessor : public DepthPacketProcessor
 
   float* xtable_;
   float* ztable_;
-  
+
   short* lut_;
 };
 
