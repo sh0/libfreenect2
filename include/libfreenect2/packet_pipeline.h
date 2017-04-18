@@ -39,7 +39,8 @@ namespace libfreenect2
 class DataCallback;
 class RgbPacketProcessor;
 class DepthPacketProcessor;
-class PacketPipelineComponents;
+class RgbPacketStreamParser;
+class DepthPacketStreamParser;
 
 /** @defgroup pipeline Packet Pipelines
  * Implement various methods to decode color and depth images with different performance and platform support
@@ -56,8 +57,20 @@ class LIBFREENECT2_API PacketPipeline
 public:
   typedef DataCallback PacketParser;
 
-  PacketPipeline();
-  virtual ~PacketPipeline();
+  virtual ~PacketPipeline() { }
+
+  virtual PacketParser *getRgbPacketParser() const = 0;
+  virtual PacketParser *getIrPacketParser() const = 0;
+
+  virtual RgbPacketProcessor *getRgbPacketProcessor() const = 0;
+  virtual DepthPacketProcessor *getDepthPacketProcessor() const = 0;
+};
+
+class LIBFREENECT2_API PacketPipelineComponents : public PacketPipeline
+{
+public:
+  PacketPipelineComponents(RgbPacketProcessor *rgb, DepthPacketProcessor *depth);
+  ~PacketPipelineComponents();
 
   virtual PacketParser *getRgbPacketParser() const;
   virtual PacketParser *getIrPacketParser() const;
@@ -65,10 +78,14 @@ public:
   virtual RgbPacketProcessor *getRgbPacketProcessor() const;
   virtual DepthPacketProcessor *getDepthPacketProcessor() const;
 protected:
-  PacketPipelineComponents *comp_;
+  RgbPacketStreamParser *rgb_parser_;
+  DepthPacketStreamParser *depth_parser_;
+
+  RgbPacketProcessor *rgb_processor_;
+  DepthPacketProcessor *depth_processor_;
 };
 
- class LIBFREENECT2_API DumpPacketPipeline: public PacketPipeline
+ class LIBFREENECT2_API DumpPacketPipeline: public PacketPipelineComponents
  {
  public:
    DumpPacketPipeline();
@@ -83,7 +100,7 @@ protected:
  };
 
 /** Pipeline with CPU depth processing. */
-class LIBFREENECT2_API CpuPacketPipeline : public PacketPipeline
+class LIBFREENECT2_API CpuPacketPipeline : public PacketPipelineComponents
 {
 public:
   CpuPacketPipeline();
@@ -92,11 +109,8 @@ public:
 
 #ifdef LIBFREENECT2_WITH_OPENGL_SUPPORT
 /** Pipeline with OpenGL depth processing. */
-class LIBFREENECT2_API OpenGLPacketPipeline : public PacketPipeline
+class LIBFREENECT2_API OpenGLPacketPipeline : public PacketPipelineComponents
 {
-protected:
-  void *parent_opengl_context_;
-  bool debug_;
 public:
   OpenGLPacketPipeline(void *parent_opengl_context = 0, bool debug = false);
   virtual ~OpenGLPacketPipeline();
@@ -105,10 +119,8 @@ public:
 
 #ifdef LIBFREENECT2_WITH_OPENCL_SUPPORT
 /** Pipeline with OpenCL depth processing. */
-class LIBFREENECT2_API OpenCLPacketPipeline : public PacketPipeline
+class LIBFREENECT2_API OpenCLPacketPipeline : public PacketPipelineComponents
 {
-protected:
-  const int deviceId;
 public:
   OpenCLPacketPipeline(const int deviceId = -1);
   virtual ~OpenCLPacketPipeline();
@@ -120,10 +132,8 @@ public:
  * Density Estimation", ECCV 2016, Felix Järemo Lawin, Per-Erik Forssen and
  * Hannes Ovren, see http://www.cvl.isy.liu.se/research/datasets/kinect2-dataset/.
  */
-class LIBFREENECT2_API OpenCLKdePacketPipeline : public PacketPipeline
+class LIBFREENECT2_API OpenCLKdePacketPipeline : public PacketPipelineComponents
 {
-protected:
-  const int deviceId;
 public:
   OpenCLKdePacketPipeline(const int deviceId = -1);
   virtual ~OpenCLKdePacketPipeline();
@@ -131,10 +141,8 @@ public:
 #endif // LIBFREENECT2_WITH_OPENCL_SUPPORT
 
 #ifdef LIBFREENECT2_WITH_CUDA_SUPPORT
-class LIBFREENECT2_API CudaPacketPipeline : public PacketPipeline
+class LIBFREENECT2_API CudaPacketPipeline : public PacketPipelineComponents
 {
-protected:
-  const int deviceId;
 public:
   CudaPacketPipeline(const int deviceId = -1);
   virtual ~CudaPacketPipeline();
@@ -146,10 +154,8 @@ public:
  * Density Estimation", ECCV 2016, Felix Järemo Lawin, Per-Erik Forssen and
  * Hannes Ovren, see http://www.cvl.isy.liu.se/research/datasets/kinect2-dataset/.
  */
-class LIBFREENECT2_API CudaKdePacketPipeline : public PacketPipeline
+class LIBFREENECT2_API CudaKdePacketPipeline : public PacketPipelineComponents
 {
-protected:
-  const int deviceId;
 public:
   CudaKdePacketPipeline(const int deviceId = -1);
   virtual ~CudaKdePacketPipeline();

@@ -61,22 +61,7 @@ static RgbPacketProcessor *getDefaultRgbPacketProcessor()
 #endif
 }
 
-class PacketPipelineComponents
-{
-public:
-  RgbPacketStreamParser *rgb_parser_;
-  DepthPacketStreamParser *depth_parser_;
-
-  RgbPacketProcessor *rgb_processor_;
-  BaseRgbPacketProcessor *async_rgb_processor_;
-  DepthPacketProcessor *depth_processor_;
-  BaseDepthPacketProcessor *async_depth_processor_;
-
-  ~PacketPipelineComponents();
-  void initialize(RgbPacketProcessor *rgb, DepthPacketProcessor *depth);
-};
-
-void PacketPipelineComponents::initialize(RgbPacketProcessor *rgb, DepthPacketProcessor *depth)
+PacketPipelineComponents::PacketPipelineComponents(RgbPacketProcessor *rgb, DepthPacketProcessor *depth)
 {
   rgb_parser_ = new RgbPacketStreamParser();
   depth_parser_ = new DepthPacketStreamParser();
@@ -84,106 +69,89 @@ void PacketPipelineComponents::initialize(RgbPacketProcessor *rgb, DepthPacketPr
   rgb_processor_ = rgb;
   depth_processor_ = depth;
 
-  async_rgb_processor_ = new AsyncPacketProcessor<RgbPacket>(rgb_processor_);
-  async_depth_processor_ = new AsyncPacketProcessor<DepthPacket>(depth_processor_);
+  BaseRgbPacketProcessor* async_rgb_processor = new AsyncPacketProcessor<RgbPacket>(rgb_processor_);
+  BaseDepthPacketProcessor* async_depth_processor = new AsyncPacketProcessor<DepthPacket>(depth_processor_);
 
-  rgb_parser_->setPacketProcessor(async_rgb_processor_);
-  depth_parser_->setPacketProcessor(async_depth_processor_);
+  rgb_parser_->setPacketProcessor(async_rgb_processor);
+  depth_parser_->setPacketProcessor(async_depth_processor);
 }
 
 PacketPipelineComponents::~PacketPipelineComponents()
 {
-  delete async_rgb_processor_;
-  delete async_depth_processor_;
+  delete rgb_parser_->getPacketProcessor(); //delete async_rgb_processor_;
+  delete depth_parser_->getPacketProcessor(); //delete async_depth_processor_;
   delete rgb_processor_;
   delete depth_processor_;
   delete rgb_parser_;
   delete depth_parser_;
 }
 
-PacketPipeline::PacketPipeline(): comp_(new PacketPipelineComponents()) {}
-
-PacketPipeline::~PacketPipeline()
+PacketPipelineComponents::PacketParser *PacketPipelineComponents::getRgbPacketParser() const
 {
-  delete comp_;
+  return rgb_parser_;
 }
 
-PacketPipeline::PacketParser *PacketPipeline::getRgbPacketParser() const
+PacketPipelineComponents::PacketParser *PacketPipelineComponents::getIrPacketParser() const
 {
-  return comp_->rgb_parser_;
+  return depth_parser_;
 }
 
-PacketPipeline::PacketParser *PacketPipeline::getIrPacketParser() const
+RgbPacketProcessor *PacketPipelineComponents::getRgbPacketProcessor() const
 {
-  return comp_->depth_parser_;
+  return rgb_processor_;
 }
 
-RgbPacketProcessor *PacketPipeline::getRgbPacketProcessor() const
+DepthPacketProcessor *PacketPipelineComponents::getDepthPacketProcessor() const
 {
-  return comp_->rgb_processor_;
+  return depth_processor_;
 }
 
-DepthPacketProcessor *PacketPipeline::getDepthPacketProcessor() const
-{
-  return comp_->depth_processor_;
-}
-
-CpuPacketPipeline::CpuPacketPipeline()
-{
-  comp_->initialize(getDefaultRgbPacketProcessor(), new CpuDepthPacketProcessor());
-}
+CpuPacketPipeline::CpuPacketPipeline() :
+  PacketPipelineComponents(getDefaultRgbPacketProcessor(), new CpuDepthPacketProcessor())
+{ }
 
 CpuPacketPipeline::~CpuPacketPipeline() { }
 
 #ifdef LIBFREENECT2_WITH_OPENGL_SUPPORT
-OpenGLPacketPipeline::OpenGLPacketPipeline(void *parent_opengl_context, bool debug) : parent_opengl_context_(parent_opengl_context), debug_(debug)
-{
-  comp_->initialize(getDefaultRgbPacketProcessor(), new OpenGLDepthPacketProcessor(parent_opengl_context_, debug_));
-}
+OpenGLPacketPipeline::OpenGLPacketPipeline(void *parent_opengl_context, bool debug) :
+  PacketPipelineComponents(getDefaultRgbPacketProcessor(), new OpenGLDepthPacketProcessor(parent_opengl_context, debug))
+{ }
 
 OpenGLPacketPipeline::~OpenGLPacketPipeline() { }
 #endif // LIBFREENECT2_WITH_OPENGL_SUPPORT
 
 
 #ifdef LIBFREENECT2_WITH_OPENCL_SUPPORT
-OpenCLPacketPipeline::OpenCLPacketPipeline(const int deviceId) : deviceId(deviceId)
-{
-  comp_->initialize(getDefaultRgbPacketProcessor(), new OpenCLDepthPacketProcessor(deviceId));
-}
+OpenCLPacketPipeline::OpenCLPacketPipeline(const int deviceId) :
+  PacketPipelineComponents(getDefaultRgbPacketProcessor(), new OpenCLDepthPacketProcessor(deviceId))
+{ }
 
 OpenCLPacketPipeline::~OpenCLPacketPipeline() { }
 
-
-OpenCLKdePacketPipeline::OpenCLKdePacketPipeline(const int deviceId) : deviceId(deviceId)
-{
-  comp_->initialize(getDefaultRgbPacketProcessor(), new OpenCLKdeDepthPacketProcessor(deviceId));
-}
+OpenCLKdePacketPipeline::OpenCLKdePacketPipeline(const int deviceId) :
+  PacketPipelineComponents(getDefaultRgbPacketProcessor(), new OpenCLKdeDepthPacketProcessor(deviceId))
+{ }
 
 OpenCLKdePacketPipeline::~OpenCLKdePacketPipeline() { }
 #endif // LIBFREENECT2_WITH_OPENCL_SUPPORT
 
 #ifdef LIBFREENECT2_WITH_CUDA_SUPPORT
-CudaPacketPipeline::CudaPacketPipeline(const int deviceId) : deviceId(deviceId)
-{
-  comp_->initialize(getDefaultRgbPacketProcessor(), new CudaDepthPacketProcessor(deviceId));
-}
+CudaPacketPipeline::CudaPacketPipeline(const int deviceId) :
+  PacketPipelineComponents(getDefaultRgbPacketProcessor(), new CudaDepthPacketProcessor(deviceId))
+{ }
 
 CudaKdePacketPipeline::~CudaKdePacketPipeline() { }
 
-CudaKdePacketPipeline::CudaKdePacketPipeline(const int deviceId) : deviceId(deviceId)
-{
-  comp_->initialize(getDefaultRgbPacketProcessor(), new CudaKdeDepthPacketProcessor(deviceId));
-}
+CudaKdePacketPipeline::CudaKdePacketPipeline(const int deviceId) :
+  PacketPipelineComponents(getDefaultRgbPacketProcessor(), new CudaKdeDepthPacketProcessor(deviceId))
+{ }
 
 CudaPacketPipeline::~CudaPacketPipeline() { }
 #endif // LIBFREENECT2_WITH_CUDA_SUPPORT
 
-DumpPacketPipeline::DumpPacketPipeline()
-{
-  RgbPacketProcessor *rgb = new DumpRgbPacketProcessor();
-  DepthPacketProcessor *depth = new DumpDepthPacketProcessor();
-  comp_->initialize(rgb, depth);
-}
+DumpPacketPipeline::DumpPacketPipeline() :
+  PacketPipelineComponents(new DumpRgbPacketProcessor(), new DumpDepthPacketProcessor())
+{ }
 
 DumpPacketPipeline::~DumpPacketPipeline() {}
 

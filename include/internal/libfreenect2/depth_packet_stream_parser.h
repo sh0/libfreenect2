@@ -63,7 +63,8 @@ public:
   DepthPacketStreamParser();
   virtual ~DepthPacketStreamParser();
 
-  void setPacketProcessor(libfreenect2::BaseDepthPacketProcessor *processor);
+  void setPacketProcessor(BaseDepthPacketProcessor *processor);
+  BaseDepthPacketProcessor* getPacketProcessor() const;
 
   virtual void onDataReceived(unsigned char* buffer, size_t length);
 private:

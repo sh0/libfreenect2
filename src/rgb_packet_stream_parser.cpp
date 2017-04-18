@@ -79,6 +79,11 @@ void RgbPacketStreamParser::setPacketProcessor(BaseRgbPacketProcessor *processor
   processor_->allocateBuffer(packet_, buffer_size_);
 }
 
+BaseRgbPacketProcessor* RgbPacketStreamParser::getPacketProcessor() const
+{
+  return processor_;
+}
+
 void RgbPacketStreamParser::onDataReceived(unsigned char* buffer, size_t length)
 {
   if (packet_.memory == NULL || packet_.memory->data == NULL)

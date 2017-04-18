@@ -54,11 +54,16 @@ DepthPacketStreamParser::~DepthPacketStreamParser()
   delete[] work_buffer_.data;
 }
 
-void DepthPacketStreamParser::setPacketProcessor(libfreenect2::BaseDepthPacketProcessor *processor)
+void DepthPacketStreamParser::setPacketProcessor(BaseDepthPacketProcessor *processor)
 {
   processor_->releaseBuffer(packet_);
   processor_ = (processor != 0) ? processor : noopProcessor<DepthPacket>();
   processor_->allocateBuffer(packet_, buffer_size_);
+}
+
+BaseDepthPacketProcessor* DepthPacketStreamParser::getPacketProcessor() const
+{
+  return processor_;
 }
 
 void DepthPacketStreamParser::onDataReceived(unsigned char* buffer, size_t in_length)

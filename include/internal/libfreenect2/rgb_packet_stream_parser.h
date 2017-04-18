@@ -47,6 +47,7 @@ public:
   virtual ~RgbPacketStreamParser();
 
   void setPacketProcessor(BaseRgbPacketProcessor *processor);
+  BaseRgbPacketProcessor* getPacketProcessor() const;
 
   virtual void onDataReceived(unsigned char* buffer, size_t length);
 private:
