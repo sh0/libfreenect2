@@ -973,6 +973,8 @@ void OpenGLDepthPacketProcessor::process(const DepthPacket &packet)
 
   ir->timestamp = packet.timestamp;
   depth->timestamp = packet.timestamp;
+  ir->timestamp_usb = packet.timestamp_usb;
+  depth->timestamp_usb = packet.timestamp_usb;
   ir->sequence = packet.sequence;
   depth->sequence = packet.sequence;
 

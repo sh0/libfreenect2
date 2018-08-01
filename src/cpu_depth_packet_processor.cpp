@@ -884,6 +884,8 @@ void CpuDepthPacketProcessor::process(const DepthPacket &packet)
 
   impl_->ir_frame->timestamp = packet.timestamp;
   impl_->depth_frame->timestamp = packet.timestamp;
+  impl_->ir_frame->timestamp_usb = packet.timestamp_usb;
+  impl_->depth_frame->timestamp_usb = packet.timestamp_usb;
   impl_->ir_frame->sequence = packet.sequence;
   impl_->depth_frame->sequence = packet.sequence;
 

@@ -159,6 +159,7 @@ void VTRgbPacketProcessor::process(const RgbPacket &packet)
     frame->format = Frame::BGRX;
 
     frame->timestamp = packet.timestamp;
+    frame->timestamp_usb = packet.timestamp_usb;
     frame->sequence = packet.sequence;
     frame->exposure = packet.exposure;
     frame->gain = packet.gain;

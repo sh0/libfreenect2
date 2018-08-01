@@ -61,7 +61,7 @@ void DepthPacketStreamParser::setPacketProcessor(libfreenect2::BaseDepthPacketPr
   processor_->allocateBuffer(packet_, buffer_size_);
 }
 
-void DepthPacketStreamParser::onDataReceived(unsigned char* buffer, size_t in_length)
+void DepthPacketStreamParser::onDataReceived(unsigned char* buffer, size_t in_length, uint64_t timestamp_usb)
 {
   if (packet_.memory == NULL || packet_.memory->data == NULL)
   {
@@ -114,6 +114,7 @@ void DepthPacketStreamParser::onDataReceived(unsigned char* buffer, size_t in_le
               DepthPacket &packet = packet_;
               packet.sequence = current_sequence_;
               packet.timestamp = footer->timestamp;
+              packet.timestamp_usb = timestamp_usb;
               packet.buffer = packet_.memory->data;
               packet.buffer_length = packet_.memory->capacity;
 

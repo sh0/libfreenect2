@@ -137,6 +137,7 @@ void DumpDepthPacketProcessor::process(const DepthPacket &packet) {
 
   Frame* ir_frame = new Frame(1, 1, packet.buffer_length, depth_frame->data);
   ir_frame->timestamp = packet.timestamp;
+  ir_frame->timestamp_usb = packet.timestamp_usb;
   ir_frame->sequence = packet.sequence;
   ir_frame->data = packet.buffer;
   ir_frame->format = Frame::Raw;

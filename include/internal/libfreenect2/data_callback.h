@@ -43,7 +43,7 @@ public:
    * @param buffer Buffer with new data.
    * @param n Size of the new data.
    */
-  virtual void onDataReceived(unsigned char *buffer, size_t n) = 0;
+  virtual void onDataReceived(unsigned char *buffer, size_t n, uint64_t timestamp_usb) = 0;
 };
 
 } // namespace libfreenect2

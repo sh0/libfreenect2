@@ -79,7 +79,7 @@ void RgbPacketStreamParser::setPacketProcessor(BaseRgbPacketProcessor *processor
   processor_->allocateBuffer(packet_, buffer_size_);
 }
 
-void RgbPacketStreamParser::onDataReceived(unsigned char* buffer, size_t length)
+void RgbPacketStreamParser::onDataReceived(unsigned char* buffer, size_t length, uint64_t timestamp_usb)
 {
   if (packet_.memory == NULL || packet_.memory->data == NULL)
   {
@@ -153,6 +153,7 @@ void RgbPacketStreamParser::onDataReceived(unsigned char* buffer, size_t length)
         RgbPacket &rgb_packet = packet_;
         rgb_packet.sequence = raw_packet->sequence;
         rgb_packet.timestamp = footer->timestamp;
+        rgb_packet.timestamp_usb = timestamp_usb;
         rgb_packet.exposure = footer->exposure;
         rgb_packet.gain = footer->gain;
         rgb_packet.gamma = footer->gamma;

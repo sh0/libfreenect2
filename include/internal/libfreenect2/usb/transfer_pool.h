@@ -84,7 +84,7 @@ protected:
   virtual libusb_transfer *allocateTransfer() = 0;
   virtual void fillTransfer(libusb_transfer *transfer) = 0;
 
-  virtual void processTransfer(libusb_transfer *transfer) = 0;
+  virtual void processTransfer(libusb_transfer *transfer, uint64_t timestamp_usb) = 0;
 
   DataCallback *callback_;
 private:
@@ -101,7 +101,7 @@ private:
 
   static void onTransferCompleteStatic(libusb_transfer *transfer);
 
-  void onTransferComplete(Transfer *transfer);
+  void onTransferComplete(Transfer *transfer, uint64_t timestamp_usb);
 };
 
 class BulkTransferPool : public TransferPool
@@ -115,7 +115,7 @@ public:
 protected:
   virtual libusb_transfer *allocateTransfer();
   virtual void fillTransfer(libusb_transfer *transfer);
-  virtual void processTransfer(libusb_transfer *transfer);
+  virtual void processTransfer(libusb_transfer *transfer, uint64_t timestamp_usb);
 };
 
 class IsoTransferPool : public TransferPool
@@ -129,7 +129,7 @@ public:
 protected:
   virtual libusb_transfer *allocateTransfer();
   virtual void fillTransfer(libusb_transfer *transfer);
-  virtual void processTransfer(libusb_transfer *transfer);
+  virtual void processTransfer(libusb_transfer *transfer, uint64_t timestamp_usb);
 
 private:
   size_t num_packets_;

@@ -58,6 +58,7 @@ void DumpRgbPacketProcessor::process(const RgbPacket &packet)
   Frame *frame = new Frame(1, 1, 1920*1080*4);
   frame->sequence = packet.sequence;
   frame->timestamp = packet.timestamp;
+  frame->timestamp_usb = packet.timestamp_usb;
   frame->exposure = packet.exposure;
   frame->gain = packet.gain;
   frame->gamma = packet.gamma;
